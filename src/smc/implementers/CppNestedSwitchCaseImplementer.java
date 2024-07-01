@@ -53,7 +53,7 @@ public class CppNestedSwitchCaseImplementer implements NSCNodeVisitor {
 
   public void visit(EventDelegatorsNode eventDelegatorsNode) {
     for (String event : eventDelegatorsNode.events) {
-      output += String.format("\tvoid %s() {processEvent(Event_%s, \"%s\");}\n", event, event, event);
+      output += String.format("\tvoid %s() {queueEvent(Event_%s, \"%s\");}\n", event, event, event);
     }
   }
 
@@ -83,11 +83,15 @@ public class CppNestedSwitchCaseImplementer implements NSCNodeVisitor {
         "\tvirtual ~%s() {}\n", fsmName);
 
     fsmClassNode.delegators.accept(this);
-    output += "\nprivate:\n";
     fsmClassNode.stateEnum.accept(this);
     output += "\tState state;\n";
-    output += "\tvoid setState(State s) {state=s;}\n";
     fsmClassNode.eventEnum.accept(this);
+    output += "\tvirtual void processEventQueue(void) {}\n";
+
+//    output += "\nprivate:\n";
+    output += "\tvirtual void queueEvent(Event event, const char *eventName) { processEvent(event, eventName); \n}";
+
+    output += "\tvoid setState(State s) {state=s;}\n";
 
     fsmClassNode.handleEvent.accept(this);
 
